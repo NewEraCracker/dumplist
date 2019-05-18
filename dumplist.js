@@ -8,7 +8,7 @@
  * @Author  Jorge Oliveira (NewEraCracker)
  * @Date    May 18th 2019
  * @License Public Domain
- * @Version 0.3.0-node
+ * @Version 0.3.1-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
@@ -366,22 +366,22 @@ class NewEra_DumpList {
         continue;
       }
 
-      // Test file sha256 if required
-      if (testsha256) {
-        const sha256 = await sha256_file(file);
-
-        if (sha256 != properties['sha256']) {
-          console.log(`${file} Expected sha256: ${properties['sha256']} Got: ${sha256}.`);
-          continue;
-        }
-      }
-
       // Test file parity if required
       if (testparity) {
         const parity = await parity_file(file);
 
         if (parity != properties['parity']) {
           console.log(`${file} Expected parity: ${properties['parity']} Got: ${parity}.`);
+          continue;
+        }
+      }
+
+      // Test file sha256 if required
+      if (testsha256) {
+        const sha256 = await sha256_file(file);
+
+        if (sha256 != properties['sha256']) {
+          console.log(`${file} Expected sha256: ${properties['sha256']} Got: ${sha256}.`);
           continue;
         }
       }
