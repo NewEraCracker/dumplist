@@ -7,6 +7,6 @@
  * @Author  Jorge Oliveira (NewEraCracker)
  * @Date    May 18th 2019
  * @License Public Domain
- * @Version 0.2.0-node
+ * @Version 0.3.0-node
  */
 ```
