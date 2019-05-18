@@ -8,7 +8,7 @@
  * @Author  Jorge Oliveira (NewEraCracker)
  * @Date    May 18th 2019
  * @License Public Domain
- * @Version 0.1.1-node
+ * @Version 0.1.2-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];

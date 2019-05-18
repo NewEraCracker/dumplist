@@ -1,11 +1,9 @@
 {
   "name": "dumplist",
-  "version": "0.1.1-node",
+  "version": "0.1.2-node",
   "description": "dumplist",
   "main": "dumplist.js",
-  "bin": {
-    "dumplist": "./dumplist.js"
-  },
+  "bin": "dumplist.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
