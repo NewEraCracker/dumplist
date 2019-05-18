@@ -304,7 +304,7 @@ class NewEra_DumpList {
         this.dumplist_touchdir();
         break;
       default:
-        die('Usage: node '.basename(__filename) + " [check|testmd5|testsha1|updatesha1|generate|update|touchdir]");
+        die('Usage: node ' + basename(__filename) + " [check|testmd5|testsha1|updatesha1|generate|update|touchdir]");
     }
   }
 
