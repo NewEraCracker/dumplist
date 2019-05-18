@@ -280,8 +280,11 @@ class NewEra_DumpList {
       die('Usage: node ' + basename(__filename) + " [check|testmd5|testsha1|updatesha1|generate|update|touchdir]");
     }
 
+    // Fix argument
+    const argument = process.argv[2].replace(/^[-]{1,2}/g, '');
+
     // Process arguments
-    switch(process.argv[2]) {
+    switch(argument) {
       case 'testmd5':
         this.dumplist_check(true);
         break;
