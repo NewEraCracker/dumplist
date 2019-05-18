@@ -1,0 +1,22 @@
+{
+  "name": "dumplist",
+  "version": "0.0.3-node",
+  "description": "dumplist",
+  "main": "dumplist.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NewEraCracker/dumplist.git"
+  },
+  "keywords": [
+    "dumplist"
+  ],
+  "author": "Jorge Oliveira (NewEraCracker)",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/NewEraCracker/dumplist/issues"
+  },
+  "homepage": "https://github.com/NewEraCracker/dumplist#readme"
+}
