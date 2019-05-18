@@ -371,7 +371,7 @@ class NewEra_DumpList {
         const sha256 = await sha256_file(file);
 
         if (sha256 != properties['sha256']) {
-          console.log(`${file} Expected sha256: ${properties['sha256']} Got: {sha256}.`);
+          console.log(`${file} Expected sha256: ${properties['sha256']} Got: ${sha256}.`);
           continue;
         }
       }
