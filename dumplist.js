@@ -8,7 +8,7 @@
  * @Author  Jorge Oliveira (NewEraCracker)
  * @Date    May 17th 2019
  * @License Public Domain
- * @Version 0.0.3-node
+ * @Version 0.1.0-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
@@ -75,7 +75,6 @@ const substr_count = (str, char) => {
 };
 
 const { basename, dirname } = require('path');
-const { chdir } = global.process;
 
 /** Utility static methods for dump listing */
 class NewEra_DumpListUtil {
@@ -280,9 +279,6 @@ class NewEra_DumpList {
     if (process.argv.length != 3) {
       die('Usage: node ' + basename(__filename) + " [check|testmd5|testsha1|updatesha1|generate|update|touchdir]");
     }
-
-    // Change dir
-    chdir(dirname(__filename));
 
     // Process arguments
     switch(process.argv[2]) {
