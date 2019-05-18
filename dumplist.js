@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 /* eslint-disable class-methods-use-this, no-await-in-loop, no-continue, no-new, no-process-exit */
 /**
  * Usage: node dumplist.js [check|testmd5|testsha1|updatesha1|generate|update|touchdir]
@@ -6,9 +6,9 @@
  * From the shadows. We shall rise...
  *
  * @Author  Jorge Oliveira (NewEraCracker)
- * @Date    May 17th 2019
+ * @Date    May 18th 2019
  * @License Public Domain
- * @Version 0.1.0-node
+ * @Version 0.1.1-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
