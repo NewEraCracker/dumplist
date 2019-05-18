@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /* eslint-disable class-methods-use-this, no-await-in-loop, no-continue, no-new, no-process-exit */
 /**
- * Usage: node dumplist.js [check|testmd5|testsha1|updatesha1|generate|update|touchdir]
+ * Usage: node dumplist.js [--check|--testmd5|--testsha1|--updatesha1|--generate|--update|--touchdir]
  *
  * From the shadows. We shall rise...
  *
  * @Author  Jorge Oliveira (NewEraCracker)
  * @Date    May 18th 2019
  * @License Public Domain
- * @Version 0.1.2-node
+ * @Version 0.2.0-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
@@ -277,7 +277,7 @@ class NewEra_DumpList {
 
     // Check arguments count
     if (process.argv.length != 3) {
-      die('Usage: node ' + basename(__filename) + " [check|testmd5|testsha1|updatesha1|generate|update|touchdir]");
+      die('Usage: node ' + basename(__filename) + " [--check|--testmd5|--testsha1|--updatesha1|--generate|--update|--touchdir]");
     }
 
     // Fix argument
@@ -307,7 +307,7 @@ class NewEra_DumpList {
         this.dumplist_touchdir();
         break;
       default:
-        die('Usage: node ' + basename(__filename) + " [check|testmd5|testsha1|updatesha1|generate|update|touchdir]");
+        die('Usage: node ' + basename(__filename) + " [--check|--testmd5|--testsha1|--updatesha1|--generate|--update|--touchdir]");
     }
   }
 
