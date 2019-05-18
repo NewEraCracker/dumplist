@@ -8,7 +8,7 @@
  * @Author  Jorge Oliveira (NewEraCracker)
  * @Date    May 18th 2019
  * @License Public Domain
- * @Version 0.2.0-node
+ * @Version 0.2.1-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
@@ -348,7 +348,7 @@ class NewEra_DumpList {
         const md5 = await md5_file(file);
 
         if (md5 != properties['md5']) {
-          console.log(`${file} Expected MD5: ${properties['md5']} Got: {md5}.`);
+          console.log(`${file} Expected MD5: ${properties['md5']} Got: ${md5}.`);
           continue;
         }
       }
