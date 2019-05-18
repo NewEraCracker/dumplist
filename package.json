@@ -1,6 +1,6 @@
 {
   "name": "dumplist",
-  "version": "0.3.1-node",
+  "version": "0.3.2-node",
   "description": "dumplist",
   "main": "dumplist.js",
   "bin": "dumplist.js",

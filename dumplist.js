@@ -8,7 +8,7 @@
  * @Author  Jorge Oliveira (NewEraCracker)
  * @Date    May 18th 2019
  * @License Public Domain
- * @Version 0.3.1-node
+ * @Version 0.3.2-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
@@ -286,16 +286,15 @@ class NewEra_Compare {
 class NewEra_DumpList {
 
   /** Construct the object and perform actions */
-  constructor (listfile = './filelist.sha256', ignored = []) {
+  constructor (listfile = './SHA256SUMS', ignored = []) {
 
     /** The file that holds the file list */
     this.listfile = listfile;
 
     /** Ignored paths */
     this.ignored = [
-      listfile,                      /* List file */
-  //  ('./' + basename(__filename)), /* This file */
-      ...ignored                     /* Original ignored array */
+      listfile,   /* List file */
+      ...ignored  /* Original ignored array */
      ];
 
     /** Simple file list array */
@@ -520,4 +519,4 @@ class NewEra_DumpList {
 }
 
 /** Run */
-new NewEra_DumpList('./filelist.sha256', ['./_incoming/', './.htaccess', './.htpasswd', './index.php']);
+new NewEra_DumpList('./SHA256SUMS', ['./_incoming/', './.htaccess', './.htpasswd', './index.php']);
