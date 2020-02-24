@@ -6,8 +6,8 @@
  * for listing and hashing contents of a directory.
  *
  * @Author  Jorge Oliveira (NewEraCracker)
- * @Date    May 18th 2019
+ * @Date    Feb 24th 2020
  * @License Public Domain
- * @Version 0.3.4-node
+ * @Version 0.3.5-node
  */
 ```

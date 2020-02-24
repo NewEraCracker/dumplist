@@ -7,9 +7,9 @@
  * for listing and hashing contents of a directory.
  *
  * @Author  Jorge Oliveira (NewEraCracker)
- * @Date    May 18th 2019
+ * @Date    Feb 24th 2020
  * @License Public Domain
- * @Version 0.3.4-node
+ * @Version 0.3.5-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
@@ -217,7 +217,10 @@ class NewEra_DumpListUtil {
         path = dir + '/' + path;
 
         // Stat the path to determine attributes
-        const stats = await stat(path);
+        const stats = await stat(path).catch(e => {
+          console.error(e);
+          return { isDirectory: () => false, isFile: () => false };
+        });
 
         if (stats.isDirectory()) {
 
@@ -395,11 +398,13 @@ class NewEra_DumpList {
     this.fileproperties = {};
 
     for (const file of this.filelist) {
+  try {
       this.fileproperties[`${file}`] = {
         mtime: await filemtime(file),
         parity: await parity_file(file),
         sha256: await sha256_file(file)
       };
+  } catch (e) { console.error(e); }
     }
 
     const contents = NewEra_DumpListUtil.prototype.generate_listfile(this.fileproperties);
@@ -419,11 +424,13 @@ class NewEra_DumpList {
       // Handle creation case
       if (!this.fileproperties.hasOwnProperty(file))
       {
+    try {
         this.fileproperties[`${file}`] = {
           'mtime': await filemtime(file),
           'parity': await parity_file(file),
           'sha256': await sha256_file(file)
         };
+    } catch (e) { console.error(e); }
         continue;
       }
     }
