@@ -7,9 +7,9 @@
  * for listing and hashing contents of a directory.
  *
  * @Author  Jorge Oliveira (NewEraCracker)
- * @Date    Feb 24th 2020
+ * @Date    Dec 8th 2021
  * @License Public Domain
- * @Version 0.3.5-node
+ * @Version 0.3.6-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
@@ -117,16 +117,16 @@ class NewEra_DumpListUtil {
   /**
    * This will parse a listfile
    */
-  async parse_listfile (filename) {
+  async parse_listfile(filename) {
 
-    const [fileproperties, comment, content] = [{}, {mtime: [], parity: [], name: []}, {sha256: [], name: []}];
+    const [fileproperties, comment, content] = [{}, { mtime: [], parity: [], name: [] }, { sha256: [], name: [] }];
 
     if (!await file_exists(filename)) {
       console.error('Error parsing listfile: File does not exist');
       return false;
     }
 
-    const filecontents = await readFile(filename, {encoding: 'utf8'});
+    const filecontents = await readFile(filename, { encoding: 'utf8' });
 
     filecontents.replace(/^; ([0-9]+) ([\w\d_-]{48}) ([*][^\r\n]+)/gm, (...m) => {
       comment.mtime.push(m[1]);
@@ -134,8 +134,7 @@ class NewEra_DumpListUtil {
       comment.name.push(m[3]);
     });
 
-    if (!comment.mtime.length)
-    {
+    if (!comment.mtime.length) {
       console.error('Error parsing listfile: Unable to parse comments');
       return false;
     }
@@ -178,7 +177,7 @@ class NewEra_DumpListUtil {
   }
 
   /** This will generate a listfile */
-  generate_listfile (fileproperties) {
+  generate_listfile(fileproperties) {
 
     // Init contents of list file
     let [comment, content] = ['', ''];
@@ -198,7 +197,7 @@ class NewEra_DumpListUtil {
   }
 
   /** Array with the paths a dir contains */
-  async readdir_recursive (dir = '.', show_dirs = false, ignored = []) {
+  async readdir_recursive(dir = '.', show_dirs = false, ignored = []) {
 
     // Set types for stack and return value
     const [stack, result] = [[], []];
@@ -256,17 +255,17 @@ class NewEra_DumpListUtil {
 class NewEra_Compare {
 
   /* Ascending directory sorting by names */
-  sort_files_by_name (a, b) {
+  sort_files_by_name(a, b) {
 
     /* Equal */
     if (a == b) { return 0; }
 
     /* Let strcmp decide */
-    return (( a > b ) ? 1 : -1 );
+    return ((a > b) ? 1 : -1);
   }
 
   /* Ascending directory sorting by levels and names */
-  sort_files_by_level_asc (a, b) {
+  sort_files_by_level_asc(a, b) {
 
     /* Equal */
     if (a == b) { return 0; }
@@ -280,7 +279,7 @@ class NewEra_Compare {
   }
 
   /* Reverse directory sorting by levels and names */
-  sort_files_by_level_dsc (a, b) {
+  sort_files_by_level_dsc(a, b) {
 
     return NewEra_Compare.prototype.sort_files_by_level_asc(b, a);
   }
@@ -290,7 +289,7 @@ class NewEra_Compare {
 class NewEra_DumpList {
 
   /** Construct the object and perform actions */
-  constructor (listfile = './SHA256SUMS', ignored = []) {
+  constructor(listfile = './SHA256SUMS', ignored = []) {
 
     /** The file that holds the file list */
     this.listfile = listfile;
@@ -299,7 +298,7 @@ class NewEra_DumpList {
     this.ignored = [
       listfile,   /* List file */
       ...ignored  /* Original ignored array */
-     ];
+    ];
 
     /** Simple file list array */
     this.filelist = [];
@@ -316,18 +315,18 @@ class NewEra_DumpList {
     const argument = process.argv[2].replace(/^[-]{1,2}/g, '');
 
     // Process arguments
-    switch(argument) {
+    switch (argument) {
       case 'test':
-        this.dumplist_check(true, true);
+        this.dumplist_update(true, true, true);
         break;
       case 'check':
-        this.dumplist_check(false, false);
+        this.dumplist_update(false, false, true);
         break;
       case 'generate':
         this.dumplist_generate();
         break;
       case 'update':
-        this.dumplist_update();
+        this.dumplist_update(false, false, false);
         break;
       case 'touchdir':
         this.dumplist_touchdir();
@@ -337,8 +336,8 @@ class NewEra_DumpList {
     }
   }
 
-  /** Run the check on each file */
-  async dumplist_check (testsha256 = false, testparity = false) {
+  /** Update dump file listing / Run the check on each file */
+  async dumplist_update(testsha256 = false, testparity = false, dryrun = false) {
 
     this.filelist = await NewEra_DumpListUtil.prototype.readdir_recursive('.', false, this.ignored);
     this.fileproperties = await NewEra_DumpListUtil.prototype.parse_listfile(this.listfile);
@@ -346,91 +345,16 @@ class NewEra_DumpList {
     if (!this.fileproperties) { return; }
 
     for (const file of this.filelist) {
-
       // Handle creation case
       if (!this.fileproperties.hasOwnProperty(file)) {
         console.log(`${file} is a new file.`);
-        continue;
-      }
-    }
-
-    for (const file of Object.keys(this.fileproperties)) {
-      const properties = this.fileproperties[`${file}`];
-
-      // Handle deletion
-      if (!await file_exists(file)) {
-        console.log(`${file} does not exist.`);
-        continue;
-      }
-
-      // Handle file modification
-      if (await filemtime(file) != properties['mtime']) {
-        console.log(`${file} was modified.`);
-        continue;
-      }
-
-      // Test file parity if required
-      if (testparity) {
-        const parity = await parity_file(file);
-
-        if (parity != properties['parity']) {
-          console.log(`${file} Expected parity: ${properties['parity']} Got: ${parity}.`);
-          continue;
-        }
-      }
-
-      // Test file sha256 if required
-      if (testsha256) {
-        const sha256 = await sha256_file(file);
-
-        if (sha256 != properties['sha256']) {
-          console.log(`${file} Expected sha256: ${properties['sha256']} Got: ${sha256}.`);
-          continue;
-        }
-      }
-    }
-  }
-
-  /** Generate dump file listing */
-  async dumplist_generate () {
-
-    this.filelist = await NewEra_DumpListUtil.prototype.readdir_recursive('.', false, this.ignored);
-    this.fileproperties = {};
-
-    for (const file of this.filelist) {
-  try {
-      this.fileproperties[`${file}`] = {
-        mtime: await filemtime(file),
-        parity: await parity_file(file),
-        sha256: await sha256_file(file)
-      };
-  } catch (e) { console.error(e); }
-    }
-
-    const contents = NewEra_DumpListUtil.prototype.generate_listfile(this.fileproperties);
-    await writeFile(this.listfile, contents);
-  }
-
-  /** Update dump file listing */
-  async dumplist_update () {
-
-    this.filelist = await NewEra_DumpListUtil.prototype.readdir_recursive('.', false, this.ignored);
-    this.fileproperties = await NewEra_DumpListUtil.prototype.parse_listfile(this.listfile);
-
-    if (!this.fileproperties) { return; }
-
-    for (const file of this.filelist) {
-
-      // Handle creation case
-      if (!this.fileproperties.hasOwnProperty(file))
-      {
-    try {
-        this.fileproperties[`${file}`] = {
-          'mtime': await filemtime(file),
-          'parity': await parity_file(file),
-          'sha256': await sha256_file(file)
-        };
-    } catch (e) { console.error(e); }
+        try {
+          if (!dryrun) this.fileproperties[`${file}`] = {
+            'mtime': await filemtime(file),
+            'parity': await parity_file(file),
+            'sha256': await sha256_file(file)
+          };
+        } catch (e) { console.error(e); }
         continue;
       }
     }
@@ -444,34 +368,88 @@ class NewEra_DumpList {
 
       // Handle deletion (Save it, will delete the keys later)
       if (!await file_exists(file)) {
-        keys_to_remove.push(file);
+        console.log(`${file} does not exist.`);
+        if (!dryrun) keys_to_remove.push(file);
         continue;
       }
 
       // Handle file modification
-      if (await filemtime(file) != properties['mtime']) {
-        this.fileproperties[`${file}`] = {
-          'mtime': await filemtime(file),
-          'parity': await parity_file(file),
-          'sha256': await sha256_file(file)
-        };
+      if (dryrun && await filemtime(file) != properties['mtime']) {
+        console.log(`${file} was modified.`);
+        continue;
+      }
+
+      // Test file parity if required
+      if (testparity) {
+        const parity = await parity_file(file);
+
+        if (parity != properties['parity']) {
+          console.log(`${file} Expected parity: ${properties['parity']} Got: ${parity}.`);
+          if (!dryrun) console.error(new Error('Parity mismatch, skiping update').stack);
+          continue;
+        }
+      }
+
+      // Test file sha256 if required
+      if (testsha256) {
+        const sha256 = await sha256_file(file);
+
+        if (sha256 != properties['sha256']) {
+          console.log(`${file} Expected sha256: ${properties['sha256']} Got: ${sha256}.`);
+          if (!dryrun) console.error(new Error('SHA256 mismatch, skiping update').stack);
+          continue;
+        }
+      }
+
+      // Handle file modification
+      if (!dryrun && await filemtime(file) != properties['mtime']) {
+        console.log(`${file} was modified.`);
+        try {
+          this.fileproperties[`${file}`] = {
+            'mtime': await filemtime(file),
+            'parity': await parity_file(file),
+            'sha256': await sha256_file(file)
+          };
+        } catch (e) { console.error(e); }
         continue;
       }
     }
 
-    // Handle deletion (Delete the keys now)
-    if (keys_to_remove.length > 0) {
-      for (const key of keys_to_remove) {
-        this.fileproperties[key] = null;
-        delete this.fileproperties[key];
+    if (!dryrun) {
+      // Handle deletion (Delete the keys now)
+      if (keys_to_remove.length > 0) {
+        for (const key of keys_to_remove) {
+          this.fileproperties[key] = null;
+          delete this.fileproperties[key];
+        }
       }
+
+      const contents = NewEra_DumpListUtil.prototype.generate_listfile(this.fileproperties);
+      await writeFile(this.listfile, contents);
+    }
+  }
+
+  /** Generate dump file listing */
+  async dumplist_generate() {
+
+    this.filelist = await NewEra_DumpListUtil.prototype.readdir_recursive('.', false, this.ignored);
+    this.fileproperties = {};
+
+    for (const file of this.filelist) {
+      try {
+        this.fileproperties[`${file}`] = {
+          mtime: await filemtime(file),
+          parity: await parity_file(file),
+          sha256: await sha256_file(file)
+        };
+      } catch (e) { console.error(e); }
     }
 
     const contents = NewEra_DumpListUtil.prototype.generate_listfile(this.fileproperties);
     await writeFile(this.listfile, contents);
   }
 
-  async dumplist_touchdir () {
+  async dumplist_touchdir() {
 
     // Filelist including directories
     const list = await NewEra_DumpListUtil.prototype.readdir_recursive('.', true, this.ignored);
@@ -501,7 +479,7 @@ class NewEra_DumpList {
 
         // Reset internal variables state when moving to another dir
         if (dir !== dirname(file)) {
-          dir  = dirname(file);
+          dir = dirname(file);
           time = 0;
         }
 
