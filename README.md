@@ -1,13 +1,13 @@
 ```
 /**
- * Usage: node dumplist.js [--check|--test|--generate|--update|--touchdir]
+ * Usage: node dumplist.js [--check|--test|--generate|--update|--touchdir|--fixts]
  *
  * Generates and works with a custom SHA256SUMS file
  * for listing and hashing contents of a directory.
  *
  * @Author  Jorge Oliveira (NewEraCracker)
- * @Date    Dec 8th 2021
+ * @Date    Nov 27th 2026
  * @License Public Domain
- * @Version 0.3.6-node
+ * @Version 0.3.7-node
  */
 ```
