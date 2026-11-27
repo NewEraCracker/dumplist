@@ -391,8 +391,12 @@ class NewEra_DumpList {
       }
 
       // Handle file modification
-      if (dryrun && !fixts && await filemtime(file) != properties['mtime']) {
+      const mtimeChanged = await filemtime(file) != properties['mtime'];
+
+      if (dryrun && !fixts && mtimeChanged) {
         console.log(`${file} was modified.`);
+        continue;
+      } else if (fixts && !mtimeChanged) {
         continue;
       }
 
@@ -421,8 +425,6 @@ class NewEra_DumpList {
       }
 
       // Handle file modification
-      const mtimeChanged = await filemtime(file) != properties['mtime'];
-
       if (!dryrun && mtimeChanged) {
         console.log(`${file} was modified.`);
         try {
