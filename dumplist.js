@@ -1,15 +1,18 @@
 #!/usr/bin/env node
+
+"use strict";
+
 /* eslint-disable class-methods-use-this, no-await-in-loop, no-continue, no-new, no-process-exit */
 /**
- * Usage: node dumplist.js [--check|--test|--generate|--update|--touchdir]
+ * Usage: node dumplist.js [--check|--test|--generate|--update|--touchdir|--fixts]
  *
  * Generates and works with a custom SHA256SUMS file
  * for listing and hashing contents of a directory.
  *
  * @Author  Jorge Oliveira (NewEraCracker)
- * @Date    Dec 8th 2021
+ * @Date    Nov 27th 2026
  * @License Public Domain
- * @Version 0.3.6-node
+ * @Version 0.3.7-node
  */
 
 const [crypto, fs, { promisify }] = [require('crypto'), require('fs'), require('util')];
@@ -123,6 +126,7 @@ class NewEra_DumpListUtil {
 
     if (!await file_exists(filename)) {
       console.error('Error parsing listfile: File does not exist');
+      process.exitCode = 1;
       return false;
     }
 
@@ -136,6 +140,7 @@ class NewEra_DumpListUtil {
 
     if (!comment.mtime.length) {
       console.error('Error parsing listfile: Unable to parse comments');
+      process.exitCode = 1;
       return false;
     }
 
@@ -146,6 +151,7 @@ class NewEra_DumpListUtil {
 
     if (!content.sha256.length) {
       console.error('Error parsing listfile: Unable to parse contents');
+      process.exitCode = 1;
       return false;
     }
 
@@ -165,11 +171,13 @@ class NewEra_DumpListUtil {
           };
         } else {
           console.error('Error parsing listfile: Invalid entry order');
+          process.exitCode = 1;
           return false;
         }
       }
     } else {
       console.error('Error parsing listfile: Invalid entry count');
+      process.exitCode = 1;
       return false;
     }
 
@@ -308,7 +316,7 @@ class NewEra_DumpList {
 
     // Check arguments count
     if (process.argv.length != 3) {
-      die('Usage: node ' + basename(__filename) + " [--check|--test|--generate|--update|--touchdir]");
+      die('Usage: node ' + basename(__filename) + " [--check|--test|--generate|--update|--touchdir|--fixts]");
     }
 
     // Fix argument
@@ -316,28 +324,37 @@ class NewEra_DumpList {
 
     // Process arguments
     switch (argument) {
+      case 'fixts':
+        this.dumplist_update(true, true, true, true);
+        break;
       case 'test':
-        this.dumplist_update(true, true, true);
+        this.dumplist_update(true, true, true, false);
         break;
       case 'check':
-        this.dumplist_update(false, false, true);
+        this.dumplist_update(false, false, true, false);
         break;
       case 'generate':
         this.dumplist_generate();
         break;
       case 'update':
-        this.dumplist_update(false, false, false);
+        this.dumplist_update(false, false, false, false);
         break;
       case 'touchdir':
         this.dumplist_touchdir();
         break;
       default:
-        die('Usage: node ' + basename(__filename) + " [--check|--test|--generate|--update|--touchdir]");
+        die('Usage: node ' + basename(__filename) + " [--check|--test|--generate|--update|--touchdir|--fixts]");
     }
   }
 
   /** Update dump file listing / Run the check on each file */
-  async dumplist_update(testsha256 = false, testparity = false, dryrun = false) {
+  async dumplist_update(testsha256 = false, testparity = false, dryrun = false, fixts = false) {
+
+    if (fixts && (!dryrun || !testparity || !testsha256)) {
+      console.error('Internal error: fixts demands dryrun, testparity and testsha256');
+      process.exitCode = 1;
+      return;
+    }
 
     this.filelist = await NewEra_DumpListUtil.prototype.readdir_recursive('.', false, this.ignored);
     this.fileproperties = await NewEra_DumpListUtil.prototype.parse_listfile(this.listfile);
@@ -374,7 +391,7 @@ class NewEra_DumpList {
       }
 
       // Handle file modification
-      if (dryrun && await filemtime(file) != properties['mtime']) {
+      if (dryrun && !fixts && await filemtime(file) != properties['mtime']) {
         console.log(`${file} was modified.`);
         continue;
       }
@@ -402,7 +419,9 @@ class NewEra_DumpList {
       }
 
       // Handle file modification
-      if (!dryrun && await filemtime(file) != properties['mtime']) {
+      const mtimeChanged = await filemtime(file) != properties['mtime'];
+
+      if (!dryrun && mtimeChanged) {
         console.log(`${file} was modified.`);
         try {
           this.fileproperties[`${file}`] = {
@@ -411,6 +430,14 @@ class NewEra_DumpList {
             'sha256': await sha256_file(file)
           };
         } catch (e) { console.error(e); }
+        continue;
+      } else if (fixts && mtimeChanged) {
+        try {
+          await utimes(file, properties['mtime'], properties['mtime']);
+        } catch (e) {
+          console.error(`Failed to restore timestamp for ${file}: ${e.message}`);
+          process.exitCode = 1;
+        }
         continue;
       }
     }
