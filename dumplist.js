@@ -519,7 +519,7 @@ class NewEra_DumpList {
 
         // Only update when mtime is correctly set and higher than time
         // Also check for writability to prevent errors
-        if (mtime > 0 && mtime > time && is_writable(dir)) {
+        if (mtime > 0 && mtime > time && await is_writable(dir)) {
 
           // Save new timestamp
           time = mtime;
