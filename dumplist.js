@@ -403,6 +403,7 @@ class NewEra_DumpList {
         if (parity != properties['parity']) {
           console.log(`${file} Expected parity: ${properties['parity']} Got: ${parity}.`);
           if (!dryrun) console.error(new Error('Parity mismatch, skiping update').stack);
+          process.exitCode = 1;
           continue;
         }
       }
@@ -414,6 +415,7 @@ class NewEra_DumpList {
         if (sha256 != properties['sha256']) {
           console.log(`${file} Expected sha256: ${properties['sha256']} Got: ${sha256}.`);
           if (!dryrun) console.error(new Error('SHA256 mismatch, skiping update').stack);
+          process.exitCode = 1;
           continue;
         }
       }
